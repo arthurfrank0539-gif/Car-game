@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Neon Rider - Car Game</title>
+    <title>Neon Rider - Arcade Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
             margin: 0;
-            background: radial-gradient(circle, #1a1a2e 0%, #0f0f1b 100%);
+            background: linear-gradient(135deg, #0b0b16 0%, #161630 50%, #0b0b16 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             color: #fff;
             overflow: hidden;
             user-select: none;
@@ -20,66 +20,67 @@
         }
         h1 {
             margin: 10px 0;
-            font-size: 2rem;
+            font-size: 2.2rem;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 0 10px #00fff2;
+            letter-spacing: 6px;
+            text-shadow: 0 0 10px #00fff2, 0 0 20px #00fff2;
+            font-weight: bold;
         }
         .container {
             position: relative;
-            box-shadow: 0 0 30px rgba(0, 255, 242, 0.2);
-            border-radius: 12px;
+            box-shadow: 0 0 40px rgba(0, 255, 242, 0.4);
+            border-radius: 16px;
             overflow: hidden;
-            width: 90%;
+            width: 92%;
             max-width: 699px;
+            background: #000;
         }
         canvas {
-            background: #111;
             display: block;
-            border: 3px solid #00fff2;
+            border: 4px solid #00fff2;
             width: 100%;
             height: auto;
         }
         #restartBtn {
             display: none;
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 12px 30px;
-            font-size: 1.2rem;
+            padding: 14px 35px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.3rem;
             font-weight: bold;
             text-transform: uppercase;
             background: #ff0055;
             color: white;
-            border: none;
-            border-radius: 30px;
+            border: 3px solid #fff;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 0 15px #ff0055;
+            box-shadow: 0 0 20px #ff0055;
             z-index: 10;
         }
-        /* Full Touch Controls Pad */
         .controls-pad {
             display: flex;
             justify-content: space-between;
-            width: 90%;
+            width: 92%;
             max-width: 699px;
             margin-top: 15px;
             margin-bottom: 15px;
-            gap: 10px;
+            gap: 15px;
         }
         .steering-group, .speed-group {
             display: flex;
             gap: 15px;
         }
         .btn {
-            width: 75px;
-            height: 75px;
-            background: rgba(0, 255, 242, 0.1);
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 255, 242, 0.05);
             border: 3px solid #00fff2;
-            border-radius: 15px;
+            border-radius: 20px;
             color: #00fff2;
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
             display: flex;
             justify-content: center;
@@ -87,7 +88,6 @@
             box-shadow: 0 0 15px rgba(0, 255, 242, 0.2);
             touch-action: none;
         }
-        /* Style variation for Action Buttons */
         .btn-action {
             border-color: #ff0055;
             color: #ff0055;
@@ -95,22 +95,22 @@
         }
         .btn:active {
             background: rgba(0, 255, 242, 0.4);
-            box-shadow: 0 0 25px #00fff2;
+            box-shadow: 0 0 30px #00fff2;
             color: #fff;
         }
         .btn-action:active {
             background: rgba(255, 0, 85, 0.4);
-            box-shadow: 0 0 25px #ff0055;
+            box-shadow: 0 0 30px #ff0055;
             color: #fff;
         }
     </style>
 </head>
 <body>
 
-<h1>Neon Rider</h1>
+<h1>NEON RIDER</h1>
 <div class="container">
-    <canvas id="gameCanvas" width="699" height="500"></canvas>
-    <button id="restartBtn" onclick="resetGame()">Drive Again</button>
+    <canvas id="gameCanvas" width="699" height="520"></canvas>
+    <button id="restartBtn" onclick="resetGame()">TRY AGAIN</button>
 </div>
 
 <div class="controls-pad">
@@ -118,7 +118,6 @@
         <div class="btn" id="leftBtn">◀</div>
         <div class="btn" id="rightBtn">▶</div>
     </div>
-    
     <div class="speed-group">
         <div class="btn btn-action" id="brakeBtn">B</div>
         <div class="btn btn-action" id="accelBtn">A</div>
@@ -130,33 +129,29 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const restartBtn = document.getElementById("restartBtn");
 
-// Game State
 let score = 0;
 let gameOver = false;
 let roadOffset = 0;
-let baseSpeed = 5; // Global difficulty baseline
+let baseSpeed = 5;
 
-// Car properties
+// Compact, detailed vehicle profiles
 let carX = 325;
-let carY = 380;
-const carWidth = 45;
-const carHeight = 75;
-const steerSpeed = 8;
+let carY = 400;
+const carWidth = 46;
+const carHeight = 80;
+const steerSpeed = 8.5;
 
-// Obstacle properties
-let obstacleX = Math.random() * (canvas.width - 45);
-let obstacleY = -80;
-const obstacleWidth = 45;
-const obstacleHeight = 75;
+let obstacleX = Math.random() * (canvas.width - 46);
+let obstacleY = -90;
+const obstacleWidth = 46;
+const obstacleHeight = 80;
 let currentObstacleSpeed = baseSpeed;
 
-// Touch tracking states
 let touchLeft = false;
 let touchRight = false;
 let touchAccel = false;
 let touchBrake = false;
 
-// Setup button listeners
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 const accelBtn = document.getElementById("accelBtn");
@@ -164,67 +159,134 @@ const brakeBtn = document.getElementById("brakeBtn");
 
 leftBtn.addEventListener("touchstart", (e) => { e.preventDefault(); touchLeft = true; });
 leftBtn.addEventListener("touchend", (e) => { e.preventDefault(); touchLeft = false; });
-
 rightBtn.addEventListener("touchstart", (e) => { e.preventDefault(); touchRight = true; });
 rightBtn.addEventListener("touchend", (e) => { e.preventDefault(); touchRight = false; });
-
 accelBtn.addEventListener("touchstart", (e) => { e.preventDefault(); touchAccel = true; });
 accelBtn.addEventListener("touchend", (e) => { e.preventDefault(); touchAccel = false; });
-
 brakeBtn.addEventListener("touchstart", (e) => { e.preventDefault(); touchBrake = true; });
 brakeBtn.addEventListener("touchend", (e) => { e.preventDefault(); touchBrake = false; });
 
-function checkCollision(rect1X, rect1Y, rect1W, rect1H, rect2X, rect2Y, rect2W, rect2H) {
-    return rect1X < rect2X + rect2W &&
-           rect1X + rect1W > rect2X &&
-           rect1Y < rect2Y + rect2H &&
-           rect1Y + rect1H > rect2Y;
+function checkCollision(r1x, r1y, r1w, r1h, r2x, r2y, r2w, r2h) {
+    return r1x < r2x + r2w && r1x + r1w > r2x && r1y < r2y + r2h && r1y + r1h > r2y;
 }
 
 function resetGame() {
     score = 0;
     gameOver = false;
     carX = 325;
-    carY = 380;
-    obstacleX = Math.random() * (canvas.width - 45);
-    obstacleY = -80;
+    carY = 400;
+    obstacleX = 50 + Math.random() * (canvas.width - 146);
+    obstacleY = -90;
     baseSpeed = 5;
     restartBtn.style.display = "none";
     gameLoop();
 }
 
+// Advanced Custom Drawing for Cars
+function drawAdvancedCar(x, y, width, height, themeColor, isObstacle) {
+    ctx.save();
+    
+    // Tire Details (Left & Right, Front & Back)
+    ctx.fillStyle = "#111116";
+    ctx.fillRect(x - 4, y + 10, 4, 16);
+    ctx.fillRect(x + width, y + 10, 4, 16);
+    ctx.fillRect(x - 4, y + height - 26, 4, 16);
+    ctx.fillRect(x + width, y + height - 26, 4, 16);
+    
+    // Alloy Rim Accents
+    ctx.fillStyle = themeColor;
+    ctx.fillRect(x - 3, y + 16, 2, 4);
+    ctx.fillRect(x + width + 1, y + 16, 2, 4);
+    ctx.fillRect(x - 3, y + height - 20, 2, 4);
+    ctx.fillRect(x + width + 1, y + height - 20, 2, 4);
+
+    // Main Structural Aero-Chassis
+    ctx.fillStyle = themeColor;
+    ctx.shadowColor = themeColor;
+    ctx.shadowBlur = 14;
+    ctx.fillRect(x, y, width, height);
+    ctx.shadowBlur = 0;
+
+    // Body Lines and Racing Trim Panels
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.fillRect(x + 4, y + 4, width - 8, height - 8);
+    ctx.fillStyle = themeColor;
+    ctx.fillRect(x + 7, y + 6, width - 14, height - 12);
+
+    if (!isObstacle) {
+        // Player Cockpit windshield & Engine Vent
+        ctx.fillStyle = "#04040a";
+        ctx.fillRect(x + 8, y + 22, width - 16, 20); // Window
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.fillRect(x + 12, y + 22, 4, 20);        // Windshield Glare
+        
+        ctx.fillStyle = "#111";
+        ctx.fillRect(x + 12, y + 52, width - 24, 14); // Spoiler Trim
+        
+        // Headlight Beams (Forward Projected Light)
+        ctx.save();
+        let beamGrad = ctx.createLinearGradient(0, y, 0, y - 80);
+        beamGrad.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+        beamGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.fillStyle = beamGrad;
+        
+        ctx.beginPath();
+        ctx.moveTo(x + 4, y);
+        ctx.lineTo(x - 15, y - 80);
+        ctx.lineTo(x + 20, y - 80);
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.moveTo(x + width - 4, y);
+        ctx.lineTo(x + width - 20, y - 80);
+        ctx.lineTo(x + width + 15, y - 80);
+        ctx.fill();
+        ctx.restore();
+    } else {
+        // Obstacle Cockpit Rear Windshield Orientation
+        ctx.fillStyle = "#04040a";
+        ctx.fillRect(x + 8, y + 38, width - 16, 20);
+        ctx.fillStyle = "rgba(255,255,255,0.25)";
+        ctx.fillRect(x + width - 16, y + 38, 3, 20);
+        
+        // Brake Lights Glow
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(x + 3, y + height - 4, 8, 4);
+        ctx.fillRect(x + width - 11, y + height - 4, 8, 4);
+    }
+    ctx.restore();
+}
+
 function gameLoop() {
     if (gameOver) {
-        ctx.fillStyle = "rgba(15, 15, 27, 0.85)";
+        ctx.fillStyle = "rgba(6, 6, 14, 0.9)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         ctx.fillStyle = "#ff0055";
-        ctx.font = "bold 50px Arial";
+        ctx.font = "bold 44px 'Courier New'";
         ctx.textAlign = "center";
         ctx.shadowColor = "#ff0055";
-        ctx.shadowBlur = 15;
-        ctx.fillText("CRASHED!", canvas.width / 2, canvas.height / 2 - 20);
+        ctx.shadowBlur = 20;
+        ctx.fillText("CRASH DETECTED", canvas.width / 2, canvas.height / 2 - 30);
 
         ctx.fillStyle = "#fff";
-        ctx.font = "22px Arial";
+        ctx.font = "bold 20px 'Courier New'";
         ctx.shadowBlur = 0;
-        ctx.fillText("Final Score: " + score, canvas.width / 2, canvas.height / 2 + 30);
+        ctx.fillText("FINAL SCORE: " + score, canvas.width / 2, canvas.height / 2 + 25);
         
         restartBtn.style.display = "block";
         return;
     }
 
-    // 1. Evaluate Active Steering Controls
-    if (touchLeft && carX > 40) carX -= steerSpeed;
-    if (touchRight && carX < canvas.width - carWidth - 40) carX += steerSpeed;
+    if (touchLeft && carX > 55) carX -= steerSpeed;
+    if (touchRight && carX < canvas.width - carWidth - 55) carX += steerSpeed;
 
-    // 2. Evaluate Dynamic Core Engine Velocity (A and B mechanics)
     if (touchAccel) {
-        currentObstacleSpeed = baseSpeed * 1.8; // Boost speed significantly
+        currentObstacleSpeed = baseSpeed * 1.8;
     } else if (touchBrake) {
-        currentObstacleSpeed = baseSpeed * 0.4; // Cool down to crawl speed
+        currentObstacleSpeed = baseSpeed * 0.4;
     } else {
-        currentObstacleSpeed = baseSpeed;       // Standard speed setting
+        currentObstacleSpeed = baseSpeed;
     }
 
     roadOffset += currentObstacleSpeed;
@@ -233,10 +295,10 @@ function gameLoop() {
     obstacleY += currentObstacleSpeed;
 
     if (obstacleY > canvas.height) {
-        obstacleY = -80;
-        obstacleX = 40 + Math.random() * (canvas.width - obstacleWidth - 80);
+        obstacleY = -90;
+        obstacleX = 55 + Math.random() * (canvas.width - obstacleWidth - 110);
         score += 1;
-        baseSpeed += 0.3; // Incremental natural scaling
+        baseSpeed += 0.25;
     }
 
     if (checkCollision(carX, carY, carWidth, carHeight, obstacleX, obstacleY, obstacleWidth, obstacleHeight)) {
@@ -244,52 +306,52 @@ function gameLoop() {
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.shadowBlur = 0;
 
-    // Roadway Environment rendering
-    ctx.fillStyle = "#22222b";
-    ctx.fillRect(40, 0, canvas.width - 80, canvas.height);
-
-    ctx.fillStyle = "#00ff66";
-    ctx.fillRect(35, 0, 5, canvas.height);
-    ctx.fillRect(canvas.width - 40, 0, 5, canvas.height);
-
-    ctx.fillStyle = "#fff";
-    for (let i = -40; i < canvas.height; i += 40) {
-        ctx.fillRect(canvas.width / 2 - 3, i + roadOffset, 6, 20);
+    // Dynamic Sci-Fi Track Grid lines (Background environment)
+    ctx.strokeStyle = "#13132a";
+    ctx.lineWidth = 2;
+    for (let xPos = 0; xPos < canvas.width; xPos += 50) {
+        ctx.beginPath();
+        ctx.moveTo(xPos, 0);
+        ctx.lineTo(xPos, canvas.height);
+        ctx.stroke();
     }
 
-    // Render Player
-    ctx.shadowColor = "#00fff2";
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = "#00fff2";
-    ctx.fillRect(carX, carY, carWidth, carHeight);
-    ctx.fillStyle = "#111";
-    ctx.fillRect(carX + 5, carY + 15, carWidth - 10, 15);
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(carX + 4, carY, 6, 4);
-    ctx.fillRect(carX + carWidth - 10, carY, 6, 4);
+    // Asphalt Mainway Base
+    ctx.fillStyle = "#16161f";
+    ctx.fillRect(50, 0, canvas.width - 100, canvas.height);
 
-    // Render Obstacle
-    ctx.shadowColor = "#ff0055";
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = "#ff0055";
-    ctx.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
-    ctx.fillStyle = "#111";
-    ctx.fillRect(obstacleX + 5, obstacleY + 45, obstacleWidth - 10, 15);
-
-    // Dynamic HUD readout
+    // Neon Track Boundaries (Glowing outer rails)
+    ctx.shadowColor = "#00ff66";
+    ctx.shadowBlur = 8;
+    ctx.fillStyle = "#00ff66";
+    ctx.fillRect(45, 0, 5, canvas.height);
+    ctx.fillRect(canvas.width - 50, 0, 5, canvas.height);
     ctx.shadowBlur = 0;
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(20, 15, 140, 40);
+
+    // Moving Dashed Track Center Divider Lanes
+    ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+    for (let i = -40; i < canvas.height; i += 50) {
+        ctx.fillRect(canvas.width / 2 - 3, i + roadOffset, 6, 25);
+    }
+
+    // Draw Player High-Tech Neon Car
+    drawAdvancedCar(carX, carY, carWidth, carHeight, "#00fff2", false);
+
+    // Draw Rival/Obstacle High-Tech Neon Car
+    drawAdvancedCar(obstacleX, obstacleY, obstacleWidth, obstacleHeight, "#ff0055", true);
+
+    // Sleek Modular HUD Interface Layout
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    ctx.fillRect(25, 20, 160, 45);
     ctx.strokeStyle = "#00fff2";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(20, 15, 140, 40);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(25, 20, 160, 45);
     
     ctx.fillStyle = "#00fff2";
-    ctx.font = "bold 18px Arial";
+    ctx.font = "bold 16px 'Courier New'";
     ctx.textAlign = "left";
-    ctx.fillText("SCORE: " + score, 35, 41);
+    ctx.fillText("SCORE: " + score, 40, 48);
 
     requestAnimationFrame(gameLoop);
 }
