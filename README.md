@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Rider - City Highway</title>
+    <title>Neon Rider - Coin Collector Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
@@ -128,6 +128,7 @@ window.addEventListener('load', function() {
     const restartBtn = document.getElementById("restartBtn");
 
     let score = 0;
+    let coins = 0; // Coin tracker variable
     let gameOver = false;
     let roadOffset = 0;
     let baseSpeed = 4;
@@ -142,6 +143,11 @@ window.addEventListener('load', function() {
     let obsH = 70;
     let obsX = 130 + Math.random() * (240 - obsW);
     let obsY = -100;
+
+    // Coin Variables
+    let coinX = 130 + Math.random() * (240 - 20);
+    let coinY = -300;
+    const coinSize = 18;
 
     let buildings = [
         { leftSide: true, y: 0, w: 75, h: 120, color: "#ff00bb" },
@@ -176,10 +182,13 @@ window.addEventListener('load', function() {
 
     window.resetGame = function() {
         score = 0;
+        coins = 0;
         gameOver = false;
         carX = 230;
         obsY = -100;
         obsX = 130 + Math.random() * (240 - obsW);
+        coinY = -300;
+        coinX = 130 + Math.random() * (240 - coinSize);
         baseSpeed = 4;
         restartBtn.style.display = "none";
         gameLoop();
@@ -193,11 +202,13 @@ window.addEventListener('load', function() {
             ctx.fillStyle = "#ff0055";
             ctx.font = "bold 30px monospace";
             ctx.textAlign = "center";
-            ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 10);
+            ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 20);
             
             ctx.fillStyle = "#fff";
             ctx.font = "18px monospace";
-            ctx.fillText("SCORE: " + score, canvas.width / 2, canvas.height / 2 + 25);
+            ctx.fillText("SCORE: " + score, canvas.width / 2, canvas.height / 2 + 15);
+            ctx.fillStyle = "#ffea00";
+            ctx.fillText("COINS: " + coins, canvas.width / 2, canvas.height / 2 + 45);
             
             restartBtn.style.display = "block";
             return;
@@ -213,12 +224,20 @@ window.addEventListener('load', function() {
         roadOffset += currentSpeed;
         if (roadOffset > 40) roadOffset = 0;
 
+        // Obstacle logic
         obsY += currentSpeed;
         if (obsY > canvas.height) {
             obsY = -100;
             obsX = 125 + Math.random() * (250 - obsW);
             score++;
-            baseSpeed += 0.2;
+            baseSpeed += 0.15;
+        }
+
+        // Coin tracking logic
+        coinY += currentSpeed;
+        if (coinY > canvas.height) {
+            coinY = -150 - Math.random() * 200;
+            coinX = 130 + Math.random() * (240 - coinSize);
         }
 
         buildings.forEach(b => {
@@ -226,8 +245,16 @@ window.addEventListener('load', function() {
             if (b.y > canvas.height) b.y = -b.h;
         });
 
+        // Player vs Obstacle Collision
         if (carX < obsX + obsW && carX + carW > obsX && carY < obsY + obsH && carY + carH > obsY) {
             gameOver = true;
+        }
+
+        // Player vs Coin Collection Collision
+        if (carX < coinX + coinSize && carX + carW > coinX && carY < coinY + coinSize && carY + carH > coinY) {
+            coins++;
+            coinY = -150 - Math.random() * 200; // Reset coin way ahead up top
+            coinX = 130 + Math.random() * (240 - coinSize);
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -265,6 +292,21 @@ window.addEventListener('load', function() {
             ctx.fillRect(canvas.width / 2 - 2, i + roadOffset, 4, 25);
         }
 
+        // Draw Glowing Coin
+        ctx.save();
+        ctx.fillStyle = "#ffea00";
+        ctx.shadowColor = "#ffea00";
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/2, 0, Math.PI * 2);
+        ctx.fill();
+        // Coin inner graphic detail
+        ctx.fillStyle = "#fff";
+        ctx.beginPath();
+        ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
         // Blue Player Car
         ctx.fillStyle = "#00fff2";
         ctx.fillRect(carX, carY, carW, carH);
@@ -283,15 +325,19 @@ window.addEventListener('load', function() {
         ctx.fillRect(obsX + 2, obsY + obsH - 5, 8, 5);
         ctx.fillRect(obsX + obsW - 10, obsY + obsH - 5, 8, 5);
 
-        // UI Score Panel
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillRect(15, 15, 110, 30);
+        // UI Score Panel (Expanded for coins display)
+        ctx.fillStyle = "rgba(0,0,0,0.7)";
+        ctx.fillRect(15, 15, 120, 50);
         ctx.strokeStyle = "#00fff2";
-        ctx.strokeRect(15, 15, 110, 30);
+        ctx.strokeRect(15, 15, 120, 50);
+        
         ctx.fillStyle = "#00fff2";
-        ctx.font = "bold 13px monospace";
+        ctx.font = "bold 12px monospace";
         ctx.textAlign = "left";
-        ctx.fillText("SCORE: " + score, 25, 34);
+        ctx.fillText("SCORE: " + score, 23, 33);
+        
+        ctx.fillStyle = "#ffea00";
+        ctx.fillText("COINS: " + coins, 23, 52);
 
         requestAnimationFrame(gameLoop);
     }
