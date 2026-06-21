@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Rider - Modern Edition</title>
+    <title>Neon Rider - Modern City Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
@@ -154,12 +154,12 @@ window.addEventListener('load', function() {
     let coinY = -300;
     const coinSize = 20;
 
-    // Elegant clean skyscrapers configuration
+    // Upgraded Modern Buildings Array Configurations
     let buildings = [
-        { leftSide: true, y: 0, w: 60, h: 180, opacity: 0.1 },
-        { leftSide: true, y: 220, w: 70, h: 140, opacity: 0.07 },
-        { leftSide: false, y: 60, w: 65, h: 160, opacity: 0.09 },
-        { leftSide: false, y: 260, w: 55, h: 200, opacity: 0.06 }
+        { leftSide: true, y: 0, w: 75, h: 180, color: "rgba(0, 255, 242, 0.15)", glowColor: "#00fff2" },
+        { leftSide: true, y: 240, w: 85, h: 160, color: "rgba(255, 0, 187, 0.12)", glowColor: "#ff00bb" },
+        { leftSide: false, y: 40, w: 80, h: 200, color: "rgba(188, 0, 255, 0.12)", glowColor: "#bc00ff" },
+        { leftSide: false, y: 280, w: 75, h: 150, color: "rgba(0, 255, 102, 0.12)", glowColor: "#00ff66" }
     ];
 
     let touchLeft = false;
@@ -255,125 +255,22 @@ window.addEventListener('load', function() {
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // --- BACKGROUND LUXURY BACKDROP ---
+        // --- DRAW DETAILED MODERN BUILDINGS WITH LIGHTS ---
         buildings.forEach(b => {
             let drawX = b.leftSide ? 10 : canvas.width - b.w - 10;
-            ctx.fillStyle = `rgba(255, 255, 255, ${b.opacity})`;
+            
+            // Core Skyscraper Block
+            ctx.fillStyle = "rgba(22, 25, 46, 0.4)";
             ctx.fillRect(drawX, b.y, b.w, b.h);
-        });
-
-        // --- MODERN PREMIUM HIGHWAY ---
-        // Clean Asphalt Roadway
-        let roadGrad = ctx.createLinearGradient(120, 0, canvas.width - 120, 0);
-        roadGrad.addColorStop(0, '#121424');
-        roadGrad.addColorStop(0.5, '#181b30');
-        roadGrad.addColorStop(1, '#121424');
-        ctx.fillStyle = roadGrad;
-        ctx.fillRect(120, 0, canvas.width - 240, canvas.height);
-
-        // Minimal Clean Lane Borders
-        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-        ctx.fillRect(120, 0, 2, canvas.height);
-        ctx.fillRect(canvas.width - 122, 0, 2, canvas.height);
-
-        // Smooth Dashed Center Guidelines
-        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-        for (let i = -60; i < canvas.height; i += 60) {
-            ctx.fillRect(canvas.width / 2 - 1, i + roadOffset, 2, 30);
-        }
-
-        // --- MINIMAL METALLIC GOLD COIN ---
-        ctx.save();
-        ctx.shadowColor = "rgba(255, 204, 0, 0.4)";
-        ctx.shadowBlur = 15;
-        let coinGrad = ctx.createRadialGradient(coinX + coinSize/2, coinY + coinSize/2, 2, coinX + coinSize/2, coinY + coinSize/2, coinSize/2);
-        coinGrad.addColorStop(0, '#fff3a8');
-        coinGrad.addColorStop(0.6, '#ffcc00');
-        coinGrad.addColorStop(1, '#d4a000');
-        ctx.fillStyle = coinGrad;
-        ctx.beginPath();
-        ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/2, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        // --- PREMIUM PLAYER SUPERCAR (DEEP GRADIENT) ---
-        ctx.save();
-        // Subtle rear tire engine trail glow
-        if (touchAccel) {
-            ctx.fillStyle = "rgba(0, 198, 255, 0.25)";
-            ctx.fillRect(carX + 4, carY + carH, 6, 12);
-            ctx.fillRect(carX + carW - 10, carY + carH, 6, 12);
-        }
-
-        // Aerodynamic Supercar body curve contouring
-        let carGrad = ctx.createLinearGradient(carX, carY, carX + carW, carY);
-        carGrad.addColorStop(0, '#0052d4');
-        carGrad.addColorStop(0.5, '#4364f7');
-        carGrad.addColorStop(1, '#6fb1fc');
-        ctx.fillStyle = carGrad;
-        
-        // Rounded premium chassis representation
-        ctx.beginPath();
-        ctx.roundRect(carX, carY, carW, carH, [10, 10, 4, 4]);
-        ctx.fill();
-
-        // Dark tinted panoramic glass cockpit windows
-        ctx.fillStyle = "#090b14";
-        ctx.beginPath();
-        ctx.roundRect(carX + 5, carY + 20, carW - 10, 24, [4, 4, 2, 2]);
-        ctx.fill();
-
-        // Front signature OLED running lights
-        ctx.fillStyle = "rgba(255,255,255,0.9)";
-        ctx.fillRect(carX + 4, carY + 2, 6, 2);
-        ctx.fillRect(carX + carW - 10, carY + 2, 6, 2);
-
-        // Premium unified red OLED lightbar (Rear)
-        ctx.fillStyle = touchBrake ? "#ff3b30" : "#aa111a";
-        ctx.fillRect(carX + 3, carY + carH - 4, carW - 6, 2);
-        ctx.restore();
-
-        // --- MINIMALIST OBS CAR (STEALTH SEDAN) ---
-        ctx.save();
-        ctx.fillStyle = "#202336";
-        ctx.beginPath();
-        ctx.roundRect(obsX, obsY, obsW, obsH, [4, 4, 8, 8]);
-        ctx.fill();
-
-        // Stealth window outlines
-        ctx.fillStyle = "#0c0d16";
-        ctx.beginPath();
-        ctx.roundRect(obsX + 4, obsY + 24, obsW - 8, 20, [2, 2, 2, 2]);
-        ctx.fill();
-
-        // Red safety tail markers
-        ctx.fillStyle = "#ff2d55";
-        ctx.fillRect(obsX + 4, obsY + obsH - 4, 5, 2);
-        ctx.fillRect(obsX + obsW - 9, obsY + obsH - 4, 5, 2);
-        ctx.restore();
-
-        // --- GLASSMORPHIC PREMIUM HUD OVERLAY ---
-        ctx.save();
-        ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
-        ctx.beginPath();
-        ctx.roundRect(20, 20, 110, 36, 12);
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "600 13px -apple-system, sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("SCORE  " + score, 75, 42);
-        ctx.restore();
-
-        requestAnimationFrame(gameLoop);
-    }
-
-    gameLoop();
-});
-</script>
-
-</body>
-</html>
+            
+            // Elegant Architectural Top Roof Accent Lines
+            ctx.fillStyle = b.color;
+            ctx.fillRect(drawX, b.y, b.w, 3);
+            
+            // Antennas atop buildings
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(drawX + b.w / 2, b.y);
+            ctx.lineTo(drawX + b.w / 2, b.y - 12);
+            ctx.stroke();
