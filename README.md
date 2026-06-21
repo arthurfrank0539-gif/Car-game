@@ -132,8 +132,9 @@
 </div>
 
 <script>
-window.addEventListener('DOMContentLoaded', () => {
+function startNeonRider() {
     const canvas = document.getElementById("gameCanvas");
+    if (!canvas) return;
     const ctx = canvas.getContext("2d");
     const restartBtn = document.getElementById("restartBtn");
 
@@ -250,11 +251,13 @@ window.addEventListener('DOMContentLoaded', () => {
         gameLoop();
     }
 
-    restartBtn.addEventListener("click", resetGame);
-    restartBtn.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        resetGame();
-    });
+    if (restartBtn) {
+        restartBtn.addEventListener("click", resetGame);
+        restartBtn.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            resetGame();
+        });
+    }
 
     function gameLoop() {
         if (gameOver) {
@@ -274,7 +277,7 @@ window.addEventListener('DOMContentLoaded', () => {
             ctx.font = "bold 16px sans-serif";
             ctx.fillText("BEST RUN: " + highScore, canvas.width / 2, canvas.height / 2 + 30);
             
-            restartBtn.style.display = "block";
+            if (restartBtn) restartBtn.style.display = "block";
             return;
         }
 
@@ -460,7 +463,14 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     gameLoop();
-});
+}
+
+// Robust fallback setup for hosted files and early browser bindings
+if (document.readyState === "complete" || document.readyState === "interactive") {
+    startNeonRider();
+} else {
+    window.addEventListener("DOMContentLoaded", startNeonRider);
+}
 </script>
 
 </body>
