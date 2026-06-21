@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Rider - Coin Score Edition</title>
+    <title>Neon Rider - Cyberpunk Arcade</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #080511;
+            background: #05030a;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: monospace;
+            font-family: 'Courier New', Courier, monospace;
             color: #fff;
             overflow: hidden;
             user-select: none;
@@ -22,27 +22,27 @@
         }
         h1 {
             margin: 5px 0;
-            font-size: 1.8rem;
+            font-size: 2rem;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            text-shadow: 0 0 10px #00fff2;
+            letter-spacing: 6px;
+            text-shadow: 0 0 10px #00fff2, 0 0 20px #00fff2;
             color: #00fff2;
             text-align: center;
         }
         .container {
             position: relative;
-            border-radius: 12px;
+            border-radius: 16px;
             overflow: hidden;
             width: 95%;
             max-width: 500px;
-            background: #000;
+            box-shadow: 0 0 30px rgba(0, 255, 242, 0.2);
         }
         canvas {
             display: block;
             border: 3px solid #00fff2;
             width: 100%;
             height: auto;
-            background: #0d081b;
+            background: #090614;
         }
         #restartBtn {
             display: none;
@@ -50,15 +50,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 12px 25px;
-            font-size: 1.1rem;
+            padding: 14px 30px;
+            font-size: 1.2rem;
             font-weight: bold;
+            letter-spacing: 2px;
             background: #ff0055;
             color: white;
             border: 2px solid #fff;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            box-shadow: 0 0 15px #ff0055;
+            box-shadow: 0 0 20px #ff0055;
             z-index: 10;
         }
         .controls-pad {
@@ -67,37 +68,41 @@
             width: 95%;
             max-width: 500px;
             margin-top: 15px;
-            gap: 10px;
+            gap: 15px;
         }
         .steering-group, .speed-group {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
         .btn {
             width: 65px;
             height: 65px;
-            background: rgba(0, 255, 242, 0.1);
+            background: rgba(0, 255, 242, 0.05);
             border: 2px solid #00fff2;
-            border-radius: 15px;
+            border-radius: 18px;
             color: #00fff2;
             font-size: 1.8rem;
-            font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
             touch-action: none;
+            box-shadow: inset 0 0 10px rgba(0, 255, 242, 0.1);
+            transition: all 0.1s ease;
         }
         .btn-action {
             border-color: #ff0055;
             color: #ff0055;
-            background: rgba(255, 0, 85, 0.1);
+            background: rgba(255, 0, 85, 0.05);
+            box-shadow: inset 0 0 10px rgba(255, 0, 85, 0.1);
         }
         .btn:active {
-            background: rgba(0, 255, 242, 0.4);
+            background: rgba(0, 255, 242, 0.3);
+            box-shadow: 0 0 15px #00fff2;
             color: #fff;
         }
         .btn-action:active {
-            background: rgba(255, 0, 85, 0.4);
+            background: rgba(255, 0, 85, 0.3);
+            box-shadow: 0 0 15px #ff0055;
             color: #fff;
         }
     </style>
@@ -107,7 +112,7 @@
 <h1>NEON RIDER</h1>
 <div class="container">
     <canvas id="gameCanvas" width="500" height="450"></canvas>
-    <button id="restartBtn" onclick="resetGame()">RESTART</button>
+    <button id="restartBtn" onclick="resetGame()">RESPAWN</button>
 </div>
 
 <div class="controls-pad">
@@ -127,7 +132,7 @@ window.addEventListener('load', function() {
     const ctx = canvas.getContext("2d");
     const restartBtn = document.getElementById("restartBtn");
 
-    let score = 0; // Score will track coins gathered
+    let score = 0;
     let gameOver = false;
     let roadOffset = 0;
     let baseSpeed = 4;
@@ -138,23 +143,22 @@ window.addEventListener('load', function() {
     const carW = 40;
     const carH = 70;
 
-    let obsW = 40;
-    let obsH = 70;
+    let obsW = 42;
+    let obsH = 72;
     let obsX = 130 + Math.random() * (240 - obsW);
     let obsY = -100;
 
-    // Coin placement tracking metrics
-    let coinX = 130 + Math.random() * (240 - 20);
+    let coinX = 130 + Math.random() * (240 - 22);
     let coinY = -300;
-    const coinSize = 18;
+    const coinSize = 22;
 
     let buildings = [
-        { leftSide: true, y: 0, w: 75, h: 120, color: "#ff00bb" },
-        { leftSide: true, y: 160, w: 70, h: 100, color: "#bc00ff" },
-        { leftSide: true, y: 300, w: 80, h: 140, color: "#00ff66" },
-        { leftSide: false, y: 40, w: 75, h: 110, color: "#00fff2" },
-        { leftSide: false, y: 200, w: 80, h: 130, color: "#ff0055" },
-        { leftSide: false, y: 360, w: 70, h: 90, color: "#00fff2" }
+        { leftSide: true, y: 0, w: 80, h: 140, color: "#ff00bb" },
+        { leftSide: true, y: 180, w: 65, h: 100, color: "#bc00ff" },
+        { leftSide: true, y: 320, w: 85, h: 160, color: "#00ff66" },
+        { leftSide: false, y: 30, w: 75, h: 120, color: "#00fff2" },
+        { leftSide: false, y: 190, w: 85, h: 150, color: "#ff0055" },
+        { leftSide: false, y: 370, w: 70, h: 110, color: "#00fff2" }
     ];
 
     let touchLeft = false;
@@ -194,41 +198,48 @@ window.addEventListener('load', function() {
 
     function gameLoop() {
         if (gameOver) {
-            ctx.fillStyle = "rgba(0,0,0,0.85)";
+            ctx.fillStyle = "rgba(5, 3, 10, 0.9)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            ctx.save();
+            ctx.shadowColor = "#ff0055";
+            ctx.shadowBlur = 15;
             ctx.fillStyle = "#ff0055";
-            ctx.font = "bold 30px monospace";
+            ctx.font = "bold 32px monospace";
             ctx.textAlign = "center";
-            ctx.fillText("GAME OVER", canvas.width / 2, canvas.height / 2 - 15);
+            ctx.fillText("SYSTEM CRASH", canvas.width / 2, canvas.height / 2 - 15);
+            ctx.restore();
             
+            ctx.save();
+            ctx.shadowColor = "#ffea00";
+            ctx.shadowBlur = 10;
             ctx.fillStyle = "#ffea00";
-            ctx.font = "bold 20px monospace";
-            ctx.fillText("COINS COLLECTED: " + score, canvas.width / 2, canvas.height / 2 + 30);
+            ctx.font = "bold 22px monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("COINS RECOVERED: " + score, canvas.width / 2, canvas.height / 2 + 35);
+            ctx.restore();
             
             restartBtn.style.display = "block";
             return;
         }
 
-        if (touchAccel) currentSpeed = baseSpeed * 1.8;
+        if (touchAccel) currentSpeed = baseSpeed * 1.9;
         else if (touchBrake) currentSpeed = baseSpeed * 0.4;
         else currentSpeed = baseSpeed;
 
-        if (touchLeft && carX > 125) carX -= 6;
-        if (touchRight && carX < canvas.width - 125 - carW) carX += 6;
+        if (touchLeft && carX > 125) carX -= 6.5;
+        if (touchRight && carX < canvas.width - 125 - carW) carX += 6.5;
 
         roadOffset += currentSpeed;
         if (roadOffset > 40) roadOffset = 0;
 
-        // Obstacle car movement (Does not update score anymore, only accelerates game)
         obsY += currentSpeed;
         if (obsY > canvas.height) {
             obsY = -100;
             obsX = 125 + Math.random() * (250 - obsW);
-            baseSpeed += 0.15; // Pass enemy car safely to increase speed difficulty
+            baseSpeed += 0.15;
         }
 
-        // Coin movement configuration logic
         coinY += currentSpeed;
         if (coinY > canvas.height) {
             coinY = -150 - Math.random() * 200;
@@ -236,99 +247,175 @@ window.addEventListener('load', function() {
         }
 
         buildings.forEach(b => {
-            b.y += currentSpeed * 0.6;
+            b.y += currentSpeed * 0.5;
             if (b.y > canvas.height) b.y = -b.h;
         });
 
-        // Crash conditions
         if (carX < obsX + obsW && carX + carW > obsX && carY < obsY + obsH && carY + carH > obsY) {
             gameOver = true;
         }
 
-        // Coin collision - Score triggers exactly when coin is grabbed
         if (carX < coinX + coinSize && carX + carW > coinX && carY < coinY + coinSize && carY + carH > coinY) {
-            score++; // Increase score only on coin grab
+            score++;
             coinY = -150 - Math.random() * 200; 
             coinX = 130 + Math.random() * (240 - coinSize);
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Render Buildings Parallax
+        // --- DRAW SKYLINE BACKGROUND ---
         buildings.forEach(b => {
             let drawX = b.leftSide ? 5 : canvas.width - b.w - 5;
-            ctx.fillStyle = "#110e26";
+            
+            // Neon building silhouette block
+            ctx.fillStyle = "#0c081d";
             ctx.fillRect(drawX, b.y, b.w, b.h);
+            
+            // Glowing neon building edges
+            ctx.save();
+            ctx.shadowColor = b.color;
+            ctx.shadowBlur = 8;
             ctx.fillStyle = b.color;
-            ctx.fillRect(drawX, b.y, b.w, 4);
-            ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-            for (let wx = drawX + 8; wx < drawX + b.w - 5; wx += 15) {
-                for (let wy = b.y + 15; wy < b.y + b.h - 10; wy += 20) {
-                    ctx.fillRect(wx, wy, 4, 6);
+            ctx.fillRect(drawX, b.y, b.w, 3); // Roof line
+            ctx.restore();
+
+            // Animated cyber window arrays
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            for (let wx = drawX + 10; wx < drawX + b.w - 8; wx += 16) {
+                for (let wy = b.y + 15; wy < b.y + b.h - 10; wy += 22) {
+                    if ((Math.floor(wy + b.y)) % 3 !== 0) { // Gives variation to lights
+                        ctx.fillStyle = (Math.random() > 0.3) ? "rgba(255, 234, 0, 0.2)" : "rgba(0, 255, 242, 0.2)";
+                        ctx.fillRect(wx, wy, 5, 7);
+                    }
                 }
             }
         });
 
-        // Road Surface
-        ctx.fillStyle = "#14141f";
+        // --- DRAW CYBERGRID HIGHWAY CORRIDOR ---
+        ctx.fillStyle = "#090615";
         ctx.fillRect(120, 0, canvas.width - 240, canvas.height);
 
-        // Neon Boundaries
-        ctx.fillStyle = "#ff00ff";
-        ctx.fillRect(115, 0, 3, canvas.height);
-        ctx.fillRect(canvas.width - 118, 0, 3, canvas.height);
-        ctx.fillStyle = "#00fff2";
-        ctx.fillRect(118, 0, 2, canvas.height);
-        ctx.fillRect(canvas.width - 120, 0, 2, canvas.height);
+        // Cyber Grid Horizontal perspective lines simulation
+        ctx.strokeStyle = "rgba(0, 255, 242, 0.07)";
+        ctx.lineWidth = 1;
+        for (let gy = roadOffset % 20; gy < canvas.height; gy += 20) {
+            ctx.beginPath();
+            ctx.moveTo(120, gy);
+            ctx.lineTo(canvas.width - 120, gy);
+            ctx.stroke();
+        }
 
-        // Track Lanes Lines
-        ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+        // Deep Glowing Neon Curbs (Double line layer style)
+        ctx.save();
+        ctx.shadowColor = "#ff00ff";
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "#ff00ff";
+        ctx.fillRect(114, 0, 3, canvas.height);
+        ctx.fillRect(canvas.width - 117, 0, 3, canvas.height);
+        
+        ctx.shadowColor = "#00fff2";
+        ctx.fillStyle = "#00fff2";
+        ctx.fillRect(117, 0, 3, canvas.height);
+        ctx.fillRect(canvas.width - 120, 0, 3, canvas.height);
+        ctx.restore();
+
+        // Laser Lane Dividers
+        ctx.fillStyle = "rgba(0, 255, 242, 0.4)";
         for (let i = -40; i < canvas.height; i += 50) {
             ctx.fillRect(canvas.width / 2 - 2, i + roadOffset, 4, 25);
         }
 
-        // Draw Gold Coin Graphic Engine
+        // --- DRAW GLOWING COIN ---
         ctx.save();
-        ctx.fillStyle = "#ffea00";
         ctx.shadowColor = "#ffea00";
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = "#ffea00";
         ctx.beginPath();
         ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/2, 0, Math.PI * 2);
         ctx.fill();
-        ctx.fillStyle = "#fff";
+        
+        // Inner Hologram Ring
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/4, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.stroke();
         ctx.restore();
 
-        // Aqua Player Sports Coupe Car
-        ctx.fillStyle = "#00fff2";
+        // --- DRAW PLAYER SPORTS COUPE (CYAN) ---
+        // Thrust trail fires when speed boost is triggered
+        ctx.save();
+        ctx.shadowColor = "#00fff2";
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = touchAccel ? "#ffea00" : "#00fff2";
+        let engineFlameH = touchAccel ? 25 : 10;
+        ctx.fillRect(carX + 8, carY + carH, 6, engineFlameH);
+        ctx.fillRect(carX + carW - 14, carY + carH, 6, engineFlameH);
+
+        // Main Car Canopy Shape
+        ctx.fillStyle = "#021726";
+        ctx.strokeStyle = "#00fff2";
+        ctx.lineWidth = 3;
         ctx.fillRect(carX, carY, carW, carH);
-        ctx.fillStyle = "#05050a";
-        ctx.fillRect(carX + 4, carY + 18, carW - 8, 22);
-        ctx.fillStyle = touchBrake ? "#ff3366" : "#990022";
-        ctx.fillRect(carX + 2, carY + carH - 5, 8, 5);
-        ctx.fillRect(carX + carW - 10, carY + carH - 5, 8, 5);
+        ctx.strokeRect(carX, carY, carW, carH);
 
-        // Pink Obstacle Car
-        ctx.fillStyle = "#ff0055";
+        // Aero Windshield Glass cockpit
+        ctx.fillStyle = "#00fff2";
+        ctx.fillRect(carX + 5, carY + 16, carW - 10, 20);
+        ctx.fillStyle = "#05050a";
+        ctx.fillRect(carX + 7, carY + 18, carW - 14, 16);
+
+        // Headlight Beams (Front)
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(carX + 3, carY, 6, 4);
+        ctx.fillRect(carX + carW - 9, carY, 6, 4);
+
+        // Vector Brake Tail Lights
+        ctx.fillStyle = touchBrake ? "#ff0055" : "#770022";
+        ctx.fillRect(carX + 2, carY + carH - 5, 8, 4);
+        ctx.fillRect(carX + carW - 10, carY + carH - 5, 8, 4);
+        ctx.restore();
+
+        // --- DRAW ENEMY MUSCLE CAR (MAGENTA) ---
+        ctx.save();
+        ctx.shadowColor = "#ff0055";
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = "#260112";
+        ctx.strokeStyle = "#ff0055";
+        ctx.lineWidth = 3;
         ctx.fillRect(obsX, obsY, obsW, obsH);
-        ctx.fillStyle = "#05050a";
-        ctx.fillRect(obsX + 4, obsY + 18, obsW - 8, 22);
-        ctx.fillStyle = "#990022";
-        ctx.fillRect(obsX + 2, obsY + obsH - 5, 8, 5);
-        ctx.fillRect(obsX + obsW - 10, obsY + obsH - 5, 8, 5);
+        ctx.strokeRect(obsX, obsY, obsW, obsH);
 
-        // HUD Layout Box Panels
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.fillRect(15, 15, 120, 36);
-        ctx.strokeStyle = "#ffea00";
-        ctx.strokeRect(15, 15, 120, 36);
-        
+        // Rear Windshield
+        ctx.fillStyle = "#ff0055";
+        ctx.fillRect(obsX + 5, obsY + obsH - 28, obsW - 10, 14);
+        ctx.fillStyle = "#05050a";
+        ctx.fillRect(obsX + 7, obsY + obsH - 26, obsW - 14, 10);
+
+        // Menacing Threat Headlight bar indicators
         ctx.fillStyle = "#ffea00";
-        ctx.font = "bold 13px monospace";
+        ctx.fillRect(obsX + 4, obsY, 8, 4);
+        ctx.fillRect(obsX + obsW - 12, obsY, 8, 4);
+        ctx.restore();
+
+        // --- CYBERPUNK HUD OVERLAY ---
+        ctx.save();
+        ctx.fillStyle = "rgba(5, 3, 10, 0.85)";
+        ctx.fillRect(15, 15, 130, 40);
+        ctx.strokeStyle = "#00fff2";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(15, 15, 130, 40);
+        
+        // Data scan lines crosshairs corner details
+        ctx.fillStyle = "#00fff2";
+        ctx.fillRect(11, 11, 8, 2);
+        ctx.fillRect(11, 11, 2, 8);
+
+        ctx.fillStyle = "#ffea00";
+        ctx.font = "bold 14px 'Courier New', monospace";
         ctx.textAlign = "left";
-        ctx.fillText("SCORE: " + score, 25, 37);
+        ctx.fillText("CORE DATA: " + score, 26, 40);
+        ctx.restore();
 
         requestAnimationFrame(gameLoop);
     }
