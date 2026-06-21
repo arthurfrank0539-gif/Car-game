@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Rider - Cyber Cityscape</title>
+    <title>Neon Rider - Arcade Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
@@ -21,7 +21,7 @@
             -webkit-user-select: none;
         }
         h1 {
-            margin: 10px 0;
+            margin: 5px 0;
             font-size: 1.5rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -48,7 +48,7 @@
         #restartBtn {
             display: none;
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
             padding: 14px 32px;
@@ -68,7 +68,7 @@
             justify-content: space-between;
             width: 92%;
             max-width: 480px;
-            margin-top: 20px;
+            margin-top: 15px;
             gap: 20px;
         }
         .steering-group, .speed-group {
@@ -103,7 +103,7 @@
 <h1>NEON RIDER</h1>
 <div class="container">
     <canvas id="gameCanvas" width="500" height="450"></canvas>
-    <button id="restartBtn" onclick="resetGame()">Try Again</button>
+    <button id="restartBtn" onclick="resetGame()">Drive Again</button>
 </div>
 
 <div class="controls-pad">
@@ -124,6 +124,7 @@ window.addEventListener('load', function() {
     const restartBtn = document.getElementById("restartBtn");
 
     let score = 0;
+    let highScore = localStorage.getItem("neonRider_highScore") ? parseInt(localStorage.getItem("neonRider_highScore")) : 0;
     let gameOver = false;
     let roadOffset = 0;
     let baseSpeed = 4;
@@ -138,12 +139,13 @@ window.addEventListener('load', function() {
     let obsH = 66;
     let obsX = 140 + Math.random() * (220 - obsW);
     let obsY = -100;
+    let obsSpeedModifier = 1; // Variable speed for enemy
+    let obsDirection = 1; // For weaving movement
 
     let coinX = 140 + Math.random() * (220 - 18);
     let coinY = -300;
     const coinSize = 18;
 
-    // Fixed safe-zone placement coordinates inside the borders
     let buildings = [
         { leftSide: true, xOffset: 8, y: 0, w: 85, h: 200, accentColor: "#00fff2" },
         { leftSide: true, xOffset: 18, y: 250, w: 75, h: 150, accentColor: "#ff00bb" },
@@ -156,11 +158,55 @@ window.addEventListener('load', function() {
     let touchAccel = false;
     let touchBrake = false;
 
+    // --- WEB AUDIO SYNTHESIZER ---
+    let audioCtx = null;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        try {
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'coin') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); // A5
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } else if (type === 'crash') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(40, audioCtx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            }
+        } catch(e) { console.log(e); }
+    }
+
     function addEvent(id, startEvt, endEvt, setter) {
         const el = document.getElementById(id);
         if (!el) return;
-        el.addEventListener(startEvt, (e) => { e.preventDefault(); setter(true); });
-        el.addEventListener(endEvt, (e) => { e.preventDefault(); setter(false); });
+        el.addEventListener(startEvt, (e) => { 
+            e.preventDefault(); 
+            initAudio();
+            setter(true); 
+        });
+        el.addEventListener(endEvt, (e) => { 
+            e.preventDefault(); 
+            setter(false); 
+        });
     }
 
     addEvent("leftBtn", "touchstart", "touchend", (v) => touchLeft = v);
@@ -179,6 +225,7 @@ window.addEventListener('load', function() {
         carX = 230;
         obsY = -100;
         obsX = 140 + Math.random() * (220 - obsW);
+        obsSpeedModifier = 1;
         coinY = -300;
         coinX = 140 + Math.random() * (220 - coinSize);
         baseSpeed = 4;
@@ -188,15 +235,22 @@ window.addEventListener('load', function() {
 
     function gameLoop() {
         if (gameOver) {
-            ctx.fillStyle = "rgba(10, 11, 21, 0.9)";
+            ctx.fillStyle = "rgba(10, 11, 21, 0.95)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             ctx.fillStyle = "#ffffff";
-            ctx.font = "600 24px sans-serif";
+            ctx.font = "600 26px sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 20);
-            ctx.fillStyle = "rgba(255,255,255,0.6)";
-            ctx.font = "15px sans-serif";
-            ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 15);
+            ctx.fillText("CRASH DETECTED", canvas.width / 2, canvas.height / 2 - 40);
+            
+            ctx.fillStyle = "rgba(255,255,255,0.7)";
+            ctx.font = "16px sans-serif";
+            ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2);
+            
+            ctx.fillStyle = "#00fff2";
+            ctx.font = "bold 16px sans-serif";
+            ctx.fillText("BEST RUN: " + highScore, canvas.width / 2, canvas.height / 2 + 30);
+            
             restartBtn.style.display = "block";
             return;
         }
@@ -209,175 +263,4 @@ window.addEventListener('load', function() {
         if (touchRight && carX < canvas.width - 140 - carW) carX += 5.5;
 
         roadOffset += currentSpeed;
-        if (roadOffset > 60) roadOffset = 0;
-
-        obsY += currentSpeed;
-        if (obsY > canvas.height) {
-            obsY = -100;
-            obsX = 140 + Math.random() * (220 - obsW);
-            baseSpeed += 0.15;
-        }
-
-        coinY += currentSpeed;
-        if (coinY > canvas.height) {
-            coinY = -150 - Math.random() * 250;
-            coinX = 145 + Math.random() * (210 - coinSize);
-        }
-
-        buildings.forEach(b => {
-            b.y += currentSpeed * 0.4;
-            if (b.y > canvas.height) b.y = -b.h;
-        });
-
-        if (carX < obsX + obsW && carX + carW > obsX && carY < obsY + obsH && carY + carH > obsY) {
-            gameOver = true;
-        }
-
-        if (carX < coinX + coinSize && carX + carW > coinX && carY < coinY + coinSize && carY + carH > coinY) {
-            score++;
-            coinY = -150 - Math.random() * 250; 
-            coinX = 145 + Math.random() * (210 - coinSize);
-        }
-
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // --- SAFE CITY BUILDINGS DRAW ENGINE ---
-        buildings.forEach(b => {
-            let drawX = b.leftSide ? b.xOffset : canvas.width - b.w - b.xOffset;
-            
-            // Core Skyscraper Building Structure
-            ctx.fillStyle = "#16182c";
-            ctx.fillRect(drawX, b.y, b.w, b.h);
-
-            // Lighted Window Grid
-            for (let wx = drawX + 8; wx < drawX + b.w - 8; wx += 16) {
-                for (let wy = b.y + 12; wy < b.y + b.h - 12; wy += 22) {
-                    if ((Math.floor(wx + wy)) % 6 !== 0) {
-                        ctx.fillStyle = "rgba(255, 230, 120, 0.28)";
-                    } else {
-                        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
-                    }
-                    ctx.fillRect(wx, wy, 6, 10);
-                }
-            }
-
-            // High Tech Roof Trim Bars
-            ctx.fillStyle = b.accentColor;
-            ctx.fillRect(drawX, b.y, b.w, 4);
-
-            // Roof Antenna Spire Lines
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(drawX + b.w / 2, b.y);
-            ctx.lineTo(drawX + b.w / 2, b.y - 14);
-            ctx.stroke();
-
-            // Blinking Rooftop Beacon Light
-            ctx.fillStyle = (Math.floor(Date.now() / 300) % 2 === 0) ? "#ff3b30" : "rgba(255,255,255,0.05)";
-            ctx.beginPath();
-            ctx.arc(drawX + b.w / 2, b.y - 14, 3, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        // --- HIGHWAY SPEED CORRIDOR ---
-        let roadGrad = ctx.createLinearGradient(135, 0, canvas.width - 135, 0);
-        roadGrad.addColorStop(0, '#0c0e18');
-        roadGrad.addColorStop(0.5, '#16192e');
-        roadGrad.addColorStop(1, '#0c0e18');
-        ctx.fillStyle = roadGrad;
-        ctx.fillRect(135, 0, canvas.width - 270, canvas.height);
-
-        // Solid Sidewalk/Track Rails
-        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-        ctx.fillRect(135, 0, 3, canvas.height);
-        ctx.fillRect(canvas.width - 138, 0, 3, canvas.height);
-
-        // Moving Track Lane Divisor
-        ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
-        for (let i = -60; i < canvas.height; i += 60) {
-            ctx.fillRect(canvas.width / 2 - 1.5, i + roadOffset, 3, 30);
-        }
-
-        // --- GLOWING SCORE COIN ---
-        ctx.fillStyle = "#ffcc00";
-        ctx.beginPath();
-        ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/2, 0, Math.PI * 2);
-        ctx.fill();
-
-        // --- DETAILED SPORTS CAR PATH GENERATION (CRASH PROOF) ---
-        // Tail exhaust effects
-        if (touchAccel) {
-            ctx.fillStyle = "rgba(0, 160, 255, 0.4)";
-            ctx.fillRect(carX + 5, carY + carH, 4, 12);
-            ctx.fillRect(carX + carW - 9, carY + carH, 4, 12);
-        }
-
-        // Sculpted Aero Body Shell
-        let carGrad = ctx.createLinearGradient(carX, carY, carX + carW, carY);
-        carGrad.addColorStop(0, '#2f80ed');
-        carGrad.addColorStop(1, '#00c6ff');
-        ctx.fillStyle = carGrad;
-        
-        ctx.beginPath();
-        ctx.moveTo(carX + 8, carY); 
-        ctx.lineTo(carX + carW - 8, carY);
-        ctx.lineTo(carX + carW, carY + 14); 
-        ctx.lineTo(carX + carW - 1, carY + carH - 6); 
-        ctx.lineTo(carX + carW - 4, carY + carH);
-        ctx.lineTo(carX + 4, carY + carH);
-        ctx.lineTo(carX + 1, carY + carH - 6);
-        ctx.lineTo(carX, carY + 14);
-        ctx.closePath();
-        ctx.fill();
-
-        // Dashboard Windshield Screen Tint
-        ctx.fillStyle = "#090a12";
-        ctx.beginPath();
-        ctx.moveTo(carX + 8, carY + 16);
-        ctx.lineTo(carX + carW - 8, carY + 16);
-        ctx.lineTo(carX + carW - 5, carY + 38);
-        ctx.lineTo(carX + 5, carY + 38);
-        ctx.closePath();
-        ctx.fill();
-
-        // Dual Laser Headlights
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(carX + 5, carY + 1, 4, 2);
-        ctx.fillRect(carX + carW - 9, carY + 1, 4, 2);
-
-        // Brake Lightbar Ribbon
-        ctx.fillStyle = touchBrake ? "#ff3b30" : "#b2131b";
-        ctx.fillRect(carX + 5, carY + carH - 3, carW - 10, 2);
-
-        // --- CHASSIS DRAW ENEMY LUXURY SEDAN ---
-        ctx.fillStyle = "#272a3f";
-        ctx.fillRect(obsX, obsY, obsW, obsH);
-
-        // Windows
-        ctx.fillStyle = "#0c0d15";
-        ctx.fillRect(obsX + 4, obsY + 20, obsW - 8, 22);
-
-        // Rear Markers
-        ctx.fillStyle = "#ff2d55";
-        ctx.fillRect(obsX + 3, obsY + obsH - 3, 5, 2);
-        ctx.fillRect(obsX + obsW - 8, obsY + obsH - 3, 5, 2);
-
-        // --- MODERN SCORE BAR UI OVERLAY ---
-        ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-        ctx.fillRect(20, 20, 110, 36);
-        
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "600 13px sans-serif";
-        ctx.textAlign = "center";
-        ctx.fillText("SCORE  " + score, 75, 42);
-
-        requestAnimationFrame(gameLoop);
-    }
-
-    gameLoop();
-});
-</script>
-
-</body>
-</html>
+        if (roadOffset > 60
