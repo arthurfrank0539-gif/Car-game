@@ -2,47 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Rider - Cyberpunk Arcade</title>
+    <title>Neon Rider - Modern Edition</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
             margin: 0;
             padding: 0;
-            background: #05030a;
+            background: radial-gradient(circle at center, #111222 0%, #060711 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Courier New', Courier, monospace;
-            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #ffffff;
             overflow: hidden;
             user-select: none;
             -webkit-user-select: none;
         }
         h1 {
-            margin: 5px 0;
-            font-size: 2rem;
+            margin: 10px 0;
+            font-size: 1.6rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 6px;
-            text-shadow: 0 0 10px #00fff2, 0 0 20px #00fff2;
-            color: #00fff2;
+            letter-spacing: 4px;
+            color: #ffffff;
+            opacity: 0.9;
             text-align: center;
         }
         .container {
             position: relative;
-            border-radius: 16px;
+            border-radius: 24px;
             overflow: hidden;
-            width: 95%;
-            max-width: 500px;
-            box-shadow: 0 0 30px rgba(0, 255, 242, 0.2);
+            width: 92%;
+            max-width: 480px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
         canvas {
             display: block;
-            border: 3px solid #00fff2;
             width: 100%;
             height: auto;
-            background: #090614;
+            background: #0d0f1d;
         }
         #restartBtn {
             display: none;
@@ -50,60 +51,61 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            padding: 14px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
-            background: #ff0055;
-            color: white;
-            border: 2px solid #fff;
-            border-radius: 8px;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 0 20px #ff0055;
+            box-shadow: 0 10px 25px rgba(255,255,255,0.25);
             z-index: 10;
+            transition: transform 0.2s;
+        }
+        #restartBtn:active {
+            transform: translate(-50%, -50%) scale(0.95);
         }
         .controls-pad {
             display: flex;
             justify-content: space-between;
-            width: 95%;
-            max-width: 500px;
-            margin-top: 15px;
-            gap: 15px;
+            width: 92%;
+            max-width: 480px;
+            margin-top: 20px;
+            gap: 20px;
         }
         .steering-group, .speed-group {
             display: flex;
             gap: 12px;
         }
         .btn {
-            width: 65px;
-            height: 65px;
-            background: rgba(0, 255, 242, 0.05);
-            border: 2px solid #00fff2;
-            border-radius: 18px;
-            color: #00fff2;
-            font-size: 1.8rem;
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+            color: #ffffff;
+            font-size: 1.4rem;
             display: flex;
             justify-content: center;
             align-items: center;
             touch-action: none;
-            box-shadow: inset 0 0 10px rgba(0, 255, 242, 0.1);
-            transition: all 0.1s ease;
-        }
-        .btn-action {
-            border-color: #ff0055;
-            color: #ff0055;
-            background: rgba(255, 0, 85, 0.05);
-            box-shadow: inset 0 0 10px rgba(255, 0, 85, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: background 0.1s, transform 0.1s;
         }
         .btn:active {
-            background: rgba(0, 255, 242, 0.3);
-            box-shadow: 0 0 15px #00fff2;
-            color: #fff;
+            background: rgba(255, 255, 255, 0.18);
+            transform: scale(0.95);
+        }
+        .btn-action {
+            color: #ff3b30;
+            border-color: rgba(255, 59, 48, 0.2);
         }
         .btn-action:active {
-            background: rgba(255, 0, 85, 0.3);
-            box-shadow: 0 0 15px #ff0055;
-            color: #fff;
+            background: rgba(255, 59, 48, 0.15);
         }
     </style>
 </head>
@@ -112,17 +114,17 @@
 <h1>NEON RIDER</h1>
 <div class="container">
     <canvas id="gameCanvas" width="500" height="450"></canvas>
-    <button id="restartBtn" onclick="resetGame()">RESPAWN</button>
+    <button id="restartBtn" onclick="resetGame()">Try Again</button>
 </div>
 
 <div class="controls-pad">
     <div class="steering-group">
-        <div class="btn" id="leftBtn">◀</div>
-        <div class="btn" id="rightBtn">▶</div>
+        <div class="btn" id="leftBtn">←</div>
+        <div class="btn" id="rightBtn">→</div>
     </div>
     <div class="speed-group">
-        <div class="btn btn-action" id="brakeBtn">B</div>
-        <div class="btn btn-action" id="accelBtn">A</div>
+        <div class="btn btn-action" id="brakeBtn">↓</div>
+        <div class="btn btn-action" id="accelBtn">↑</div>
     </div>
 </div>
 
@@ -140,25 +142,24 @@ window.addEventListener('load', function() {
 
     let carX = 230;
     let carY = 340;
-    const carW = 40;
-    const carH = 70;
+    const carW = 38;
+    const carH = 72;
 
-    let obsW = 42;
+    let obsW = 38;
     let obsH = 72;
     let obsX = 130 + Math.random() * (240 - obsW);
     let obsY = -100;
 
-    let coinX = 130 + Math.random() * (240 - 22);
+    let coinX = 130 + Math.random() * (240 - 24);
     let coinY = -300;
-    const coinSize = 22;
+    const coinSize = 20;
 
+    // Elegant clean skyscrapers configuration
     let buildings = [
-        { leftSide: true, y: 0, w: 80, h: 140, color: "#ff00bb" },
-        { leftSide: true, y: 180, w: 65, h: 100, color: "#bc00ff" },
-        { leftSide: true, y: 320, w: 85, h: 160, color: "#00ff66" },
-        { leftSide: false, y: 30, w: 75, h: 120, color: "#00fff2" },
-        { leftSide: false, y: 190, w: 85, h: 150, color: "#ff0055" },
-        { leftSide: false, y: 370, w: 70, h: 110, color: "#00fff2" }
+        { leftSide: true, y: 0, w: 60, h: 180, opacity: 0.1 },
+        { leftSide: true, y: 220, w: 70, h: 140, opacity: 0.07 },
+        { leftSide: false, y: 60, w: 65, h: 160, opacity: 0.09 },
+        { leftSide: false, y: 260, w: 55, h: 200, opacity: 0.06 }
     ];
 
     let touchLeft = false;
@@ -198,56 +199,47 @@ window.addEventListener('load', function() {
 
     function gameLoop() {
         if (gameOver) {
-            ctx.fillStyle = "rgba(5, 3, 10, 0.9)";
+            ctx.fillStyle = "rgba(10, 11, 21, 0.85)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            ctx.save();
-            ctx.shadowColor = "#ff0055";
-            ctx.shadowBlur = 15;
-            ctx.fillStyle = "#ff0055";
-            ctx.font = "bold 32px monospace";
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "600 24px -apple-system, sans-serif";
             ctx.textAlign = "center";
-            ctx.fillText("SYSTEM CRASH", canvas.width / 2, canvas.height / 2 - 15);
-            ctx.restore();
+            ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2 - 20);
             
-            ctx.save();
-            ctx.shadowColor = "#ffea00";
-            ctx.shadowBlur = 10;
-            ctx.fillStyle = "#ffea00";
-            ctx.font = "bold 22px monospace";
-            ctx.textAlign = "center";
-            ctx.fillText("COINS RECOVERED: " + score, canvas.width / 2, canvas.height / 2 + 35);
-            ctx.restore();
+            ctx.fillStyle = "rgba(255,255,255,0.6)";
+            ctx.font = "15px -apple-system, sans-serif";
+            ctx.fillText("Score: " + score, canvas.width / 2, canvas.height / 2 + 15);
             
             restartBtn.style.display = "block";
             return;
         }
 
-        if (touchAccel) currentSpeed = baseSpeed * 1.9;
+        if (touchAccel) currentSpeed = baseSpeed * 1.8;
         else if (touchBrake) currentSpeed = baseSpeed * 0.4;
         else currentSpeed = baseSpeed;
 
-        if (touchLeft && carX > 125) carX -= 6.5;
-        if (touchRight && carX < canvas.width - 125 - carW) carX += 6.5;
+        if (touchLeft && carX > 130) carX -= 6;
+        if (touchRight && carX < canvas.width - 130 - carW) carX += 6;
 
         roadOffset += currentSpeed;
-        if (roadOffset > 40) roadOffset = 0;
+        if (roadOffset > 60) roadOffset = 0;
 
         obsY += currentSpeed;
         if (obsY > canvas.height) {
             obsY = -100;
-            obsX = 125 + Math.random() * (250 - obsW);
+            obsX = 130 + Math.random() * (240 - obsW);
             baseSpeed += 0.15;
         }
 
         coinY += currentSpeed;
         if (coinY > canvas.height) {
-            coinY = -150 - Math.random() * 200;
-            coinX = 130 + Math.random() * (240 - coinSize);
+            coinY = -150 - Math.random() * 250;
+            coinX = 135 + Math.random() * (230 - coinSize);
         }
 
         buildings.forEach(b => {
-            b.y += currentSpeed * 0.5;
+            b.y += currentSpeed * 0.4;
             if (b.y > canvas.height) b.y = -b.h;
         });
 
@@ -257,164 +249,123 @@ window.addEventListener('load', function() {
 
         if (carX < coinX + coinSize && carX + carW > coinX && carY < coinY + coinSize && carY + carH > coinY) {
             score++;
-            coinY = -150 - Math.random() * 200; 
-            coinX = 130 + Math.random() * (240 - coinSize);
+            coinY = -150 - Math.random() * 250; 
+            coinX = 135 + Math.random() * (230 - coinSize);
         }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // --- DRAW SKYLINE BACKGROUND ---
+        // --- BACKGROUND LUXURY BACKDROP ---
         buildings.forEach(b => {
-            let drawX = b.leftSide ? 5 : canvas.width - b.w - 5;
-            
-            // Neon building silhouette block
-            ctx.fillStyle = "#0c081d";
+            let drawX = b.leftSide ? 10 : canvas.width - b.w - 10;
+            ctx.fillStyle = `rgba(255, 255, 255, ${b.opacity})`;
             ctx.fillRect(drawX, b.y, b.w, b.h);
-            
-            // Glowing neon building edges
-            ctx.save();
-            ctx.shadowColor = b.color;
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = b.color;
-            ctx.fillRect(drawX, b.y, b.w, 3); // Roof line
-            ctx.restore();
-
-            // Animated cyber window arrays
-            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
-            for (let wx = drawX + 10; wx < drawX + b.w - 8; wx += 16) {
-                for (let wy = b.y + 15; wy < b.y + b.h - 10; wy += 22) {
-                    if ((Math.floor(wy + b.y)) % 3 !== 0) { // Gives variation to lights
-                        ctx.fillStyle = (Math.random() > 0.3) ? "rgba(255, 234, 0, 0.2)" : "rgba(0, 255, 242, 0.2)";
-                        ctx.fillRect(wx, wy, 5, 7);
-                    }
-                }
-            }
         });
 
-        // --- DRAW CYBERGRID HIGHWAY CORRIDOR ---
-        ctx.fillStyle = "#090615";
+        // --- MODERN PREMIUM HIGHWAY ---
+        // Clean Asphalt Roadway
+        let roadGrad = ctx.createLinearGradient(120, 0, canvas.width - 120, 0);
+        roadGrad.addColorStop(0, '#121424');
+        roadGrad.addColorStop(0.5, '#181b30');
+        roadGrad.addColorStop(1, '#121424');
+        ctx.fillStyle = roadGrad;
         ctx.fillRect(120, 0, canvas.width - 240, canvas.height);
 
-        // Cyber Grid Horizontal perspective lines simulation
-        ctx.strokeStyle = "rgba(0, 255, 242, 0.07)";
-        ctx.lineWidth = 1;
-        for (let gy = roadOffset % 20; gy < canvas.height; gy += 20) {
-            ctx.beginPath();
-            ctx.moveTo(120, gy);
-            ctx.lineTo(canvas.width - 120, gy);
-            ctx.stroke();
+        // Minimal Clean Lane Borders
+        ctx.fillStyle = "rgba(255, 255, 255, 0.05)";
+        ctx.fillRect(120, 0, 2, canvas.height);
+        ctx.fillRect(canvas.width - 122, 0, 2, canvas.height);
+
+        // Smooth Dashed Center Guidelines
+        ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+        for (let i = -60; i < canvas.height; i += 60) {
+            ctx.fillRect(canvas.width / 2 - 1, i + roadOffset, 2, 30);
         }
 
-        // Deep Glowing Neon Curbs (Double line layer style)
+        // --- MINIMAL METALLIC GOLD COIN ---
         ctx.save();
-        ctx.shadowColor = "#ff00ff";
-        ctx.shadowBlur = 10;
-        ctx.fillStyle = "#ff00ff";
-        ctx.fillRect(114, 0, 3, canvas.height);
-        ctx.fillRect(canvas.width - 117, 0, 3, canvas.height);
-        
-        ctx.shadowColor = "#00fff2";
-        ctx.fillStyle = "#00fff2";
-        ctx.fillRect(117, 0, 3, canvas.height);
-        ctx.fillRect(canvas.width - 120, 0, 3, canvas.height);
-        ctx.restore();
-
-        // Laser Lane Dividers
-        ctx.fillStyle = "rgba(0, 255, 242, 0.4)";
-        for (let i = -40; i < canvas.height; i += 50) {
-            ctx.fillRect(canvas.width / 2 - 2, i + roadOffset, 4, 25);
-        }
-
-        // --- DRAW GLOWING COIN ---
-        ctx.save();
-        ctx.shadowColor = "#ffea00";
-        ctx.shadowBlur = 14;
-        ctx.fillStyle = "#ffea00";
+        ctx.shadowColor = "rgba(255, 204, 0, 0.4)";
+        ctx.shadowBlur = 15;
+        let coinGrad = ctx.createRadialGradient(coinX + coinSize/2, coinY + coinSize/2, 2, coinX + coinSize/2, coinY + coinSize/2, coinSize/2);
+        coinGrad.addColorStop(0, '#fff3a8');
+        coinGrad.addColorStop(0.6, '#ffcc00');
+        coinGrad.addColorStop(1, '#d4a000');
+        ctx.fillStyle = coinGrad;
         ctx.beginPath();
         ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/2, 0, Math.PI * 2);
         ctx.fill();
+        ctx.restore();
+
+        // --- PREMIUM PLAYER SUPERCAR (DEEP GRADIENT) ---
+        ctx.save();
+        // Subtle rear tire engine trail glow
+        if (touchAccel) {
+            ctx.fillStyle = "rgba(0, 198, 255, 0.25)";
+            ctx.fillRect(carX + 4, carY + carH, 6, 12);
+            ctx.fillRect(carX + carW - 10, carY + carH, 6, 12);
+        }
+
+        // Aerodynamic Supercar body curve contouring
+        let carGrad = ctx.createLinearGradient(carX, carY, carX + carW, carY);
+        carGrad.addColorStop(0, '#0052d4');
+        carGrad.addColorStop(0.5, '#4364f7');
+        carGrad.addColorStop(1, '#6fb1fc');
+        ctx.fillStyle = carGrad;
         
-        // Inner Hologram Ring
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
+        // Rounded premium chassis representation
         ctx.beginPath();
-        ctx.arc(coinX + coinSize/2, coinY + coinSize/2, coinSize/4, 0, Math.PI * 2);
+        ctx.roundRect(carX, carY, carW, carH, [10, 10, 4, 4]);
+        ctx.fill();
+
+        // Dark tinted panoramic glass cockpit windows
+        ctx.fillStyle = "#090b14";
+        ctx.beginPath();
+        ctx.roundRect(carX + 5, carY + 20, carW - 10, 24, [4, 4, 2, 2]);
+        ctx.fill();
+
+        // Front signature OLED running lights
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.fillRect(carX + 4, carY + 2, 6, 2);
+        ctx.fillRect(carX + carW - 10, carY + 2, 6, 2);
+
+        // Premium unified red OLED lightbar (Rear)
+        ctx.fillStyle = touchBrake ? "#ff3b30" : "#aa111a";
+        ctx.fillRect(carX + 3, carY + carH - 4, carW - 6, 2);
+        ctx.restore();
+
+        // --- MINIMALIST OBS CAR (STEALTH SEDAN) ---
+        ctx.save();
+        ctx.fillStyle = "#202336";
+        ctx.beginPath();
+        ctx.roundRect(obsX, obsY, obsW, obsH, [4, 4, 8, 8]);
+        ctx.fill();
+
+        // Stealth window outlines
+        ctx.fillStyle = "#0c0d16";
+        ctx.beginPath();
+        ctx.roundRect(obsX + 4, obsY + 24, obsW - 8, 20, [2, 2, 2, 2]);
+        ctx.fill();
+
+        // Red safety tail markers
+        ctx.fillStyle = "#ff2d55";
+        ctx.fillRect(obsX + 4, obsY + obsH - 4, 5, 2);
+        ctx.fillRect(obsX + obsW - 9, obsY + obsH - 4, 5, 2);
+        ctx.restore();
+
+        // --- GLASSMORPHIC PREMIUM HUD OVERLAY ---
+        ctx.save();
+        ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+        ctx.beginPath();
+        ctx.roundRect(20, 20, 110, 36, 12);
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.restore();
-
-        // --- DRAW PLAYER SPORTS COUPE (CYAN) ---
-        // Thrust trail fires when speed boost is triggered
-        ctx.save();
-        ctx.shadowColor = "#00fff2";
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = touchAccel ? "#ffea00" : "#00fff2";
-        let engineFlameH = touchAccel ? 25 : 10;
-        ctx.fillRect(carX + 8, carY + carH, 6, engineFlameH);
-        ctx.fillRect(carX + carW - 14, carY + carH, 6, engineFlameH);
-
-        // Main Car Canopy Shape
-        ctx.fillStyle = "#021726";
-        ctx.strokeStyle = "#00fff2";
-        ctx.lineWidth = 3;
-        ctx.fillRect(carX, carY, carW, carH);
-        ctx.strokeRect(carX, carY, carW, carH);
-
-        // Aero Windshield Glass cockpit
-        ctx.fillStyle = "#00fff2";
-        ctx.fillRect(carX + 5, carY + 16, carW - 10, 20);
-        ctx.fillStyle = "#05050a";
-        ctx.fillRect(carX + 7, carY + 18, carW - 14, 16);
-
-        // Headlight Beams (Front)
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(carX + 3, carY, 6, 4);
-        ctx.fillRect(carX + carW - 9, carY, 6, 4);
-
-        // Vector Brake Tail Lights
-        ctx.fillStyle = touchBrake ? "#ff0055" : "#770022";
-        ctx.fillRect(carX + 2, carY + carH - 5, 8, 4);
-        ctx.fillRect(carX + carW - 10, carY + carH - 5, 8, 4);
-        ctx.restore();
-
-        // --- DRAW ENEMY MUSCLE CAR (MAGENTA) ---
-        ctx.save();
-        ctx.shadowColor = "#ff0055";
-        ctx.shadowBlur = 12;
-        ctx.fillStyle = "#260112";
-        ctx.strokeStyle = "#ff0055";
-        ctx.lineWidth = 3;
-        ctx.fillRect(obsX, obsY, obsW, obsH);
-        ctx.strokeRect(obsX, obsY, obsW, obsH);
-
-        // Rear Windshield
-        ctx.fillStyle = "#ff0055";
-        ctx.fillRect(obsX + 5, obsY + obsH - 28, obsW - 10, 14);
-        ctx.fillStyle = "#05050a";
-        ctx.fillRect(obsX + 7, obsY + obsH - 26, obsW - 14, 10);
-
-        // Menacing Threat Headlight bar indicators
-        ctx.fillStyle = "#ffea00";
-        ctx.fillRect(obsX + 4, obsY, 8, 4);
-        ctx.fillRect(obsX + obsW - 12, obsY, 8, 4);
-        ctx.restore();
-
-        // --- CYBERPUNK HUD OVERLAY ---
-        ctx.save();
-        ctx.fillStyle = "rgba(5, 3, 10, 0.85)";
-        ctx.fillRect(15, 15, 130, 40);
-        ctx.strokeStyle = "#00fff2";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(15, 15, 130, 40);
         
-        // Data scan lines crosshairs corner details
-        ctx.fillStyle = "#00fff2";
-        ctx.fillRect(11, 11, 8, 2);
-        ctx.fillRect(11, 11, 2, 8);
-
-        ctx.fillStyle = "#ffea00";
-        ctx.font = "bold 14px 'Courier New', monospace";
-        ctx.textAlign = "left";
-        ctx.fillText("CORE DATA: " + score, 26, 40);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "600 13px -apple-system, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("SCORE  " + score, 75, 42);
         ctx.restore();
 
         requestAnimationFrame(gameLoop);
